@@ -5,6 +5,7 @@ package ca.mcgill.ecse211.odometer;
 
 import ca.mcgill.ecse211.lab2.Lab2;
 import lejos.hardware.Sound;
+import lejos.hardware.lcd.LCD;
 import lejos.hardware.lcd.TextLCD;
 import java.text.DecimalFormat;
 
@@ -67,25 +68,20 @@ public class OdometryCorrection implements Runnable {
 	      if ( (theta > 350 && theta < 361) || (theta > 0 && theta < 10) ) {
 	    	  county++;
 	    	  odometer.setXYT(0.0,county * squareLength,0.0);
-	    	 // lcd.drawString("apply corr: y=" + numberFormat.format(county * squareLength), 0, 3);
 	      }
 	      else if ( (theta > 80 && theta < 100) ) {
 	    	  countx++;
 	    	  odometer.setX(countx * squareLength);
-	    	  //lcd.drawString("apply corr: x=" + numberFormat.format(countx * squareLength), 0, 3);
 	      }
 	      else if ( (theta > 170 && theta < 190) ) {
 	    	  county--;
 	    	  odometer.setY(county * squareLength);
-	    	 // lcd.drawString("apply corr: y=" + numberFormat.format(county * squareLength), 0, 3);
 	      }
 	      else if ( theta > 260 && theta < 280) {
 	    	  countx--;
 	    	  odometer.setX(countx * squareLength);
-	    	 // lcd.drawString("apply corr: x=" + numberFormat.format(countx * squareLength), 0, 3);
 	      }
 		}
-     // odometer.setXYT(0.3, 19.23, 5.0);
       
 
       // this ensure the odometry correction occurs only once every period
