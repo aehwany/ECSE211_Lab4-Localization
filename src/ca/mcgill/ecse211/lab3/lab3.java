@@ -54,8 +54,7 @@ public class lab3 {
     int buttonChoice;
 
     // Odometer related objects
-    Odometer odometer = Odometer.getOdometer(leftMotor, rightMotor, TRACK, WHEEL_RAD); 
-    //ObstacleAvoidance obstacleAvoidance = new ObstacleAvoidance(); 
+    Odometer odometer = Odometer.getOdometer(leftMotor, rightMotor, TRACK, WHEEL_RAD);  
     Display odometryDisplay = new Display(lcd); 
     //ObstacleAvoidance obstacleavoidance = new ObstacleAvoidance(leftMotor, rightMotor, TRACK, WHEEL_RAD);
     do {
@@ -133,7 +132,8 @@ public class lab3 {
           }
        // Start NavWithObstacle thread
           if(buttonChoice == Button.ID_RIGHT){
-        	//obstacleavoidance.run();
+        	 ObstacleAvoidance obstacleAvoidance = new ObstacleAvoidance(leftMotor,rightMotor,TRACK,WHEEL_RAD, finalPath);
+        	 obstacleAvoidance.run();
         	// run the obstacleAvoidance
           }
 

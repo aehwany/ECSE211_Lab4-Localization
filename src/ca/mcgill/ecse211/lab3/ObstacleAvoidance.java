@@ -24,15 +24,16 @@ public class ObstacleAvoidance implements Runnable {
 	int iterator = 0;
 	private Odometer odometer;
 	private OdometerData odoData;
-	private double[][]  wayPoints = new double[][]{{0*30.48,2*30.48}, // change values for different maps
-												  {1*30.48,1*30.48},
-												  {2*30.48,2*30.48},
-												  {2*30.48,1*30.48},
-												  {1*30.48,0*30.48} // change values for different maps
-												};
+	int[][] path;
+//	private double[][]  wayPoints = new double[][]{{0*30.48,2*30.48}, // change values for different maps
+//												  {1*30.48,1*30.48},
+//												  {2*30.48,2*30.48},
+//												  {2*30.48,1*30.48},
+//												  {1*30.48,0*30.48} // change values for different maps
+//												};
 		//array list for points
 		public ObstacleAvoidance(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor,
-				final double TRACK, final double WHEEL_RAD) throws OdometerExceptions { // constructor
+				final double TRACK, final double WHEEL_RAD, int[][] finalPath) throws OdometerExceptions { // constructor
 			this.odometer = Odometer.getOdometer();
 			this.leftMotor = leftMotor;
 			this.rightMotor = rightMotor;
@@ -40,6 +41,7 @@ public class ObstacleAvoidance implements Runnable {
 			odoData.setXYT(0 , 0 , 0);
 			this.TRACK = TRACK;
 			this.WHEEL_RAD = WHEEL_RAD;
+			this.path = finalPath;
 			SensorModes usSensor = new EV3UltrasonicSensor(usPort); // usSensor is the instance
 			usDistance = usSensor.getMode("Distance"); // usDistance provides samples from
 			// this instance
@@ -61,8 +63,8 @@ public class ObstacleAvoidance implements Runnable {
 				// the odometer will be interrupted by another thread
 			}
 			// implemented this for loop so that navigation will work for any number of points
-			while(iterator < wayPoints.length) { //iterate through all the points 
-				travelTo(wayPoints[iterator][0], wayPoints[iterator][1]);
+			while(iterator < path.length) { //iterate through all the points 
+				travelTo(path[iterator][0], path[iterator][1]);
 				iterator++;
 			}
 		}
