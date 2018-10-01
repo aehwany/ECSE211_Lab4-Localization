@@ -10,7 +10,14 @@ import lejos.hardware.port.Port;
 import lejos.hardware.sensor.EV3UltrasonicSensor;
 import lejos.hardware.sensor.SensorModes;
 import lejos.robotics.SampleProvider;
-
+/**
+ * @author Ahmed Elehwany 260707540, Barry Chen
+ * This the the main class where we 
+ * 1. Start the program,
+ * 2. Start the UI interface for map selection
+ * 3. Call the Navigation or ObstacleAvoidance class and begin threads
+ *
+ */
 public class lab3 {
 
   // Motor Objects, and Robot related parameters
@@ -19,8 +26,8 @@ public class lab3 {
   private static final EV3LargeRegulatedMotor rightMotor =
       new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
   private static final TextLCD lcd = LocalEV3.get().getTextLCD();
+  
   public static final double WHEEL_RAD = 2.15;
-  //public static final double TRACK = 16.63;
   public static final double TRACK = 13.7;
   
   /*
@@ -37,6 +44,11 @@ public class lab3 {
 
 	static int[][] finalPath;
 	
+	/**
+	 * This is the main method for this class where the program starts
+	 * @param args
+	 * @throws Exception
+	 */
   public static void main(String[] args) throws OdometerExceptions {
 
     int buttonChoice;
@@ -68,7 +80,7 @@ public class lab3 {
 	     lcd.drawString(" Map 1 | Map 2 ", 0, 2);
 	     lcd.drawString("       |       ", 0, 3);
 	     lcd.drawString("       |       ", 0, 4);
-	     buttonChoice = Button.waitForAnyPress();   // Record choice (left or right press)
+	     buttonChoice = Button.waitForAnyPress();   // Record button choice
 	     if (buttonChoice == Button.ID_LEFT) {     
 	    	 finalPath = path1;      // Set map 2
 	      }
@@ -114,16 +126,18 @@ public class lab3 {
           Thread odoDisplayThread = new Thread(odometryDisplay);
           odoDisplayThread.start();
           
+       // Start NavWithoutObstacle thread
           if(buttonChoice == Button.ID_LEFT){
         	 Navigation navigation = new Navigation(leftMotor,rightMotor,TRACK,WHEEL_RAD, finalPath);
         	 navigation.run();
           }
-          
+       // Start NavWithObstacle thread
           if(buttonChoice == Button.ID_RIGHT){
         	//obstacleavoidance.run();
         	// run the obstacleAvoidance
           }
 
+       // If button is pressed, exit the program
         while (Button.waitForAnyPress() != Button.ID_ESCAPE);
         System.exit(0);
       }

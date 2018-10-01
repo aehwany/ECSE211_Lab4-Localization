@@ -6,28 +6,38 @@ import lejos.hardware.port.Port;
 import lejos.robotics.SampleProvider;
 import lejos.hardware.Button;
 
+/**
+ * @author Ahmed Elehwany 260707540, Barry Chen
+ * class for navigation between points without using obstacle avoidance.
+ *
+ */
 public class Navigation implements Runnable {
 
 	private EV3LargeRegulatedMotor leftMotor;
 	private EV3LargeRegulatedMotor rightMotor;
 	private final double TRACK;
 	private final double WHEEL_RAD;
-	public static final int FORWARD_SPEED = 250;
+	private Odometer odometer;
+	private OdometerData odoData;
+	private static final int FORWARD_SPEED = 250;
 	private static final int ROTATE_SPEED = 150;
+	private static final double tileLength = 30.48;
 	double currentT, currentY, currentX;
 	double dx, dy;
 	double t;
 	double distance;
-	private Odometer odometer;
-	private OdometerData odoData;
 	int[][] path;
-	private static final double tileLength = 30.48;
-//	private int[][]  wayPoints = new int [][]{     {0,2}, // change values for different maps
-//												   {1,1},
-//												   {2,2},
-//												   {2,1},
-//												   {1,0}};
-												 //array list for points
+
+	/**
+	 * creates a navigation instance.
+	 * @param leftMotor left motor object
+	 * @param rightMotor right motor object
+	 * @param TRACK track value
+	 * @param WHEEL_RAD wheel radius
+	 * @param finalPath map coordinates list
+	 * 
+	 * @throws Exception
+	 */
 	public Navigation(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor,
 		      final double TRACK, final double WHEEL_RAD, int[][] finalPath) throws OdometerExceptions {
 		this.odometer = Odometer.getOdometer();
@@ -41,7 +51,10 @@ public class Navigation implements Runnable {
 
 	}
 
-	// run method (required for Thread)
+	/**
+	 * method to start moving the car in navigation mode
+	 * @return void
+	 */
 	public void run() {
 		// wait 5 seconds
 		for (EV3LargeRegulatedMotor motor : new EV3LargeRegulatedMotor[] {leftMotor, rightMotor}) {
@@ -59,7 +72,16 @@ public class Navigation implements Runnable {
 			travelTo(path[i][0] * tileLength, path[i][1] * tileLength);
 		}
 	}
-
+	
+	/**
+	 * causes  the  robot  to  travel  to  the  absolute  field  location  (x,  y),  
+	 * specified  in tilepoints.This  method  should  continuously  callturnTo(double theta)
+	 * and  then set  the motor speed to forward(straight). This will make sure that your heading is updated
+	 * until you reach your exact goal. This method will poll the odometer for information.
+	 * @param x x-coordinate
+	 * @param y y-coordinate 
+	 * @return void
+	 */
 	void travelTo(double x, double y) {
 		currentX = odometer.getXYT()[0];//get the current position of the robot
 		currentY = odometer.getXYT()[1];
@@ -89,7 +111,12 @@ public class Navigation implements Runnable {
 	    leftMotor.rotate(convertDistance(WHEEL_RAD, distance), true);
 	    rightMotor.rotate(convertDistance(WHEEL_RAD, distance), false);
 	}
- 
+	/**
+	 *	This method causes the robot to turn (on point) to the absolute heading theta. 
+	 *  This method should turn a MINIMAL angle to its target.
+	 *  @param theta turn angle value
+	 *  @return void
+	 */
 	void turnTo(double theta) {
 		if(theta>180) {//angel convention, turn in correct minimal angle
 			theta=360-theta;
@@ -113,18 +140,34 @@ public class Navigation implements Runnable {
 		}
 	}
 	
-	    
+	/**
+	 * This  method  returns  true  if  another  thread  has  called travelTo()
+	 * or turnTo()and  the method has yet to return; false otherwise.    
+	 * @return boolean 
+	 */
 	boolean isNavigating() {
 	 if((leftMotor.isMoving() && rightMotor.isMoving()))
 		 return true;
 	 else 
 		 return false;
-
 	}
 	
+	/**
+	 * This  method  converts target distance to wheel rotation.
+	 * @param radius radius of wheel
+	 * @param distance target distance
+	 * @return the wheel rotation 
+	 */
 	 private static int convertDistance(double radius, double distance) {
 		    return (int) ((180.0 * distance) / (Math.PI * radius));
 		  }
+	 	/**
+		 * This  method  converts target distance to wheel rotation.
+		 * @param radius radius of wheel
+		 * @param width track value
+		 * @param angle target turn angle 
+		 * @return the wheel rotation 
+		 */
 	 private static int convertAngle(double radius, double width, double angle) {
 		    return convertDistance(radius, Math.PI * width * angle / 360.0);
 	}
