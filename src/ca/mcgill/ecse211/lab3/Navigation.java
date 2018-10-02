@@ -161,13 +161,13 @@ public class Navigation implements Runnable {
 	 private static int convertDistance(double radius, double distance) {
 		    return (int) ((180.0 * distance) / (Math.PI * radius));
 		  }
-	 	/**
-		 * This  method  converts target distance to wheel rotation.
-		 * @param radius radius of wheel
-		 * @param width track value
-		 * @param angle target turn angle 
-		 * @return the wheel rotation 
-		 */
+ 	/**
+	 * This  method  converts target distance to wheel rotation.
+	 * @param radius radius of wheel
+	 * @param width track value
+	 * @param angle target turn angle 
+	 * @return the wheel rotation 
+	 */
 	 private static int convertAngle(double radius, double width, double angle) {
 		    return convertDistance(radius, Math.PI * width * angle / 360.0);
 	}
