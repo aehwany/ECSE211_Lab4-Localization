@@ -134,7 +134,7 @@ public class lab3 {
           if(buttonChoice == Button.ID_RIGHT){
         	 ObstacleAvoidance obstacleAvoidance = new ObstacleAvoidance(leftMotor,rightMotor,TRACK,WHEEL_RAD, finalPath);
         	 obstacleAvoidance.run();
-        	// run the obstacleAvoidance
+        	 //run the obstacleAvoidance
           }
 
        // If button is pressed, exit the program

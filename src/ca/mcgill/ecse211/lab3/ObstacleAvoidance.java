@@ -1,4 +1,5 @@
 package ca.mcgill.ecse211.lab3;
+
 import lejos.hardware.sensor.*;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
@@ -18,6 +19,7 @@ public class ObstacleAvoidance implements Runnable {
 	private final double WHEEL_RAD;
 	public static final int FORWARD_SPEED = 250;
 	private static final int ROTATE_SPEED = 150;
+	private static final double tileLength = 30.48;
 	double currentT, currentY, currentX;
 	double dx, dy, dt;
 	double distanceToTravel;
@@ -25,12 +27,12 @@ public class ObstacleAvoidance implements Runnable {
 	private Odometer odometer;
 	private OdometerData odoData;
 	int[][] path;
+	
 //	private double[][]  wayPoints = new double[][]{{0*30.48,2*30.48}, // change values for different maps
-//												  {1*30.48,1*30.48},
-//												  {2*30.48,2*30.48},
-//												  {2*30.48,1*30.48},
-//												  {1*30.48,0*30.48} // change values for different maps
-//												};
+//		{1*30.48,1*30.48},
+//		{2*30.48,2*30.48},
+//		{2*30.48,1*30.48},
+//		{1*30.48,0*30.48}};
 		//array list for points
 		public ObstacleAvoidance(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor,
 				final double TRACK, final double WHEEL_RAD, int[][] finalPath) throws OdometerExceptions { // constructor
@@ -64,7 +66,7 @@ public class ObstacleAvoidance implements Runnable {
 			}
 			// implemented this for loop so that navigation will work for any number of points
 			while(iterator < path.length) { //iterate through all the points 
-				travelTo(path[iterator][0], path[iterator][1]);
+				travelTo(path[iterator][0]*tileLength, path[iterator][1]*tileLength);
 				iterator++;
 			}
 		}
@@ -74,7 +76,7 @@ public class ObstacleAvoidance implements Runnable {
 			currentY = odometer.getXYT()[1];
 			currentT = odometer.getXYT()[2];
 
-			dx = x - currentX;
+			dx = x- currentX;
 			dy = y - currentY;
 			distanceToTravel = Math.sqrt(dx*dx+dy*dy);
 			if(dy>=0) {
@@ -101,27 +103,54 @@ public class ObstacleAvoidance implements Runnable {
 			while(isNavigating()) { //avoiding the obstacles
 				usDistance.fetchSample(usData,0);
 				float distance = usData[0]*100;
-				if(distance<= 15) {
-					if(odometer.getXYT()[0]<2.4*30.48&&odometer.getXYT()[0]>1.3*30.48&&odometer.getXYT()[1]<2.5*30.48&&odometer.getXYT()[1]>1.6*30.48){
-						leftMotor.rotate(-convertAngle(WHEEL_RAD, TRACK, 90), true);  // turn when facing obstacle and travel a certain distance and then turn again 
-						rightMotor.rotate(convertAngle(WHEEL_RAD, TRACK, 90), false);// then travel a certain distance
+				if(distance<= 15) {		
+					if ((odometer.getXYT()[2] > 270 && odometer.getXYT()[2] < 360) || (odometer.getXYT()[2] > 0 && odometer.getXYT()[2] < 90)) 
+					{
+						//turn left
+						if(odometer.getXYT()[0]<2.4*30.48&&odometer.getXYT()[0]>1.3*30.48&&odometer.getXYT()[1]<2.5*30.48&&odometer.getXYT()[1]>1.6*30.48){
+							leftMotor.rotate(-convertAngle(WHEEL_RAD, TRACK, 90), true);  // turn when facing obstacle and travel a certain distance and then turn again 
+							rightMotor.rotate(convertAngle(WHEEL_RAD, TRACK, 90), false);// then travel a certain distance
+							leftMotor.rotate(convertDistance(WHEEL_RAD, 30), true);
+							rightMotor.rotate(convertDistance(WHEEL_RAD, 30), false);
+							leftMotor.rotate(convertAngle(WHEEL_RAD, TRACK, 90), true);
+							rightMotor.rotate(-convertAngle(WHEEL_RAD, TRACK, 90), false);
+							leftMotor.rotate(convertDistance(WHEEL_RAD, 40), true);
+							rightMotor.rotate(convertDistance(WHEEL_RAD, 40), false);
+						}
+						else {		//turn right
+						leftMotor.rotate(convertAngle(WHEEL_RAD, TRACK, 90), true);  // turn when facing obstacle and travel a certain distance and then turn again 
+						rightMotor.rotate(-convertAngle(WHEEL_RAD, TRACK, 90), false);// then travel a certain distance
 						leftMotor.rotate(convertDistance(WHEEL_RAD, 30), true);
 						rightMotor.rotate(convertDistance(WHEEL_RAD, 30), false);
-						leftMotor.rotate(convertAngle(WHEEL_RAD, TRACK, 90), true);
-						rightMotor.rotate(-convertAngle(WHEEL_RAD, TRACK, 90), false);
+						leftMotor.rotate(-convertAngle(WHEEL_RAD, TRACK, 90), true);
+						rightMotor.rotate(convertAngle(WHEEL_RAD, TRACK, 90), false);
 						leftMotor.rotate(convertDistance(WHEEL_RAD, 40), true);
 						rightMotor.rotate(convertDistance(WHEEL_RAD, 40), false);
+						}
 					}
-					else {
-					leftMotor.rotate(convertAngle(WHEEL_RAD, TRACK, 90), true);  // turn when facing obstacle and travel a certain distance and then turn again 
-					rightMotor.rotate(-convertAngle(WHEEL_RAD, TRACK, 90), false);// then travel a certain distance
-					leftMotor.rotate(convertDistance(WHEEL_RAD, 30), true);
-					rightMotor.rotate(convertDistance(WHEEL_RAD, 30), false);
-					leftMotor.rotate(-convertAngle(WHEEL_RAD, TRACK, 90), true);
-					rightMotor.rotate(convertAngle(WHEEL_RAD, TRACK, 90), false);
-					leftMotor.rotate(convertDistance(WHEEL_RAD, 40), true);
-					rightMotor.rotate(convertDistance(WHEEL_RAD, 40), false);
+					else {		//turn right
+						if(odometer.getXYT()[0]<2.4*30.48&&odometer.getXYT()[0]>1.3*30.48&&odometer.getXYT()[1]<2.5*30.48&&odometer.getXYT()[1]>1.6*30.48){
+							leftMotor.rotate(convertAngle(WHEEL_RAD, TRACK, 90), true);  // turn when facing obstacle and travel a certain distance and then turn again 
+							rightMotor.rotate(-convertAngle(WHEEL_RAD, TRACK, 90), false);// then travel a certain distance
+							leftMotor.rotate(convertDistance(WHEEL_RAD, 30), true);
+							rightMotor.rotate(convertDistance(WHEEL_RAD, 30), false);
+							leftMotor.rotate(-convertAngle(WHEEL_RAD, TRACK, 90), true);
+							rightMotor.rotate(convertAngle(WHEEL_RAD, TRACK, 90), false);
+							leftMotor.rotate(convertDistance(WHEEL_RAD, 40), true);
+							rightMotor.rotate(convertDistance(WHEEL_RAD, 40), false);
+						}
+						else {		//turn left
+							leftMotor.rotate(-convertAngle(WHEEL_RAD, TRACK, 90), true);  // turn when facing obstacle and travel a certain distance and then turn again 
+							rightMotor.rotate(convertAngle(WHEEL_RAD, TRACK, 90), false);// then travel a certain distance
+							leftMotor.rotate(convertDistance(WHEEL_RAD, 30), true);
+							rightMotor.rotate(convertDistance(WHEEL_RAD, 30), false);
+							leftMotor.rotate(convertAngle(WHEEL_RAD, TRACK, 90), true);
+							rightMotor.rotate(-convertAngle(WHEEL_RAD, TRACK, 90), false);
+							leftMotor.rotate(convertDistance(WHEEL_RAD, 40), true);
+							rightMotor.rotate(convertDistance(WHEEL_RAD, 40), false);
+						}
 					}
+					
 					iterator--;
 				}
 			}
