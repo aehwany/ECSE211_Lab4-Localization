@@ -119,7 +119,8 @@ public class ObstacleAvoidance implements Runnable {
 			while(isNavigating()) { //avoiding the obstacles
 				usDistance.fetchSample(usData,0);
 				float distance = usData[0]*100;
-				if(distance<= 15) {		
+				if(distance<= 15) {	
+					//if y is increasing, that's when the angle range is 270~360 or 0~90
 					if ((odometer.getXYT()[2] > 270 && odometer.getXYT()[2] < 360) || (odometer.getXYT()[2] > 0 && odometer.getXYT()[2] < 90)) 
 					{
 						//turn left
@@ -144,7 +145,8 @@ public class ObstacleAvoidance implements Runnable {
 						rightMotor.rotate(convertDistance(WHEEL_RAD, 40), false);
 						}
 					}
-					else {		//turn right
+					else {	//if y is decreasing, that's when the angle range is 90~270 	
+						//turn right
 						if(odometer.getXYT()[0]<2.4*30.48&&odometer.getXYT()[0]>1.3*30.48&&odometer.getXYT()[1]<2.5*30.48&&odometer.getXYT()[1]>1.6*30.48){
 							leftMotor.rotate(convertAngle(WHEEL_RAD, TRACK, 90), true);  // turn when facing obstacle and travel a certain distance and then turn again 
 							rightMotor.rotate(-convertAngle(WHEEL_RAD, TRACK, 90), false);// then travel a certain distance

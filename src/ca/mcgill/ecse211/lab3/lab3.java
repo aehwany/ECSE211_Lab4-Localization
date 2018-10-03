@@ -39,7 +39,7 @@ public class lab3 {
 	 */
 	static int[][] path1 = {{0, 2},		{1, 1},     {2, 2},     {2, 1},   {1, 0}};
 	static int[][] path2 = {{1, 1},     {0, 2},     {2, 2},     {2, 1},   {1, 0}};
-	static int[][] path3 = {{1, 0},     {2, 1},     {0, 2},     {0, 2},   {1, 1}};
+	static int[][] path3 = {{1, 0},     {2, 1},     {2, 2},     {0, 2},   {1, 1}};
 	static int[][] path4 = {{0, 1},     {1, 2},     {1, 0},     {2, 1},   {2, 2}};
 
 	static int[][] finalPath;
