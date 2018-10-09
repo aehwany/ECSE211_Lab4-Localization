@@ -1,4 +1,4 @@
-package ca.mcgill.ecse211.lab3;
+package ca.mcgill.ecse211.lab4;
 import lejos.hardware.sensor.*;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
@@ -13,8 +13,8 @@ import lejos.hardware.Button;
  */
 public class Navigation implements Runnable {
 
-	private EV3LargeRegulatedMotor leftMotor;
-	private EV3LargeRegulatedMotor rightMotor;
+	public static EV3LargeRegulatedMotor leftMotor;
+	public static EV3LargeRegulatedMotor rightMotor;
 	private final double TRACK;
 	private final double WHEEL_RAD;
 	private Odometer odometer;
@@ -22,11 +22,11 @@ public class Navigation implements Runnable {
 	private static final int FORWARD_SPEED = 250;
 	private static final int ROTATE_SPEED = 150;
 	private static final double tileLength = 30.48;
+	private static double prevAngle = 0;
 	double currentT, currentY, currentX;
 	double dx, dy;
 	double t;
 	double distance;
-	int[][] path;
 
 	/**
 	 * creates a navigation instance.
@@ -39,7 +39,7 @@ public class Navigation implements Runnable {
 	 * @throws Exception
 	 */
 	public Navigation(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor,
-		      final double TRACK, final double WHEEL_RAD, int[][] finalPath) throws OdometerExceptions {
+		      final double TRACK, final double WHEEL_RAD) throws OdometerExceptions {
 		this.odometer = Odometer.getOdometer();
 	    this.leftMotor = leftMotor;
 	    this.rightMotor = rightMotor;
@@ -47,8 +47,6 @@ public class Navigation implements Runnable {
 	    odoData.setXYT(0 , 0 , 0);
 	    this.TRACK = TRACK;
 	    this.WHEEL_RAD = WHEEL_RAD;
-	    this.path = finalPath;
-
 	}
 
 	/**
@@ -68,9 +66,7 @@ public class Navigation implements Runnable {
 			// the odometer will be interrupted by another thread
 		}
 		// implemented this for loop so that navigation will work for any number of points
-		for (int i = 0; i < path.length; i++) { 
-			travelTo(path[i][0] * tileLength, path[i][1] * tileLength);
-		}
+		
 	}
 	
 	/**
@@ -83,7 +79,8 @@ public class Navigation implements Runnable {
 	 * @return void
 	 */
 	void travelTo(double x, double y) {
-		currentX = odometer.getXYT()[0];//get the current position of the robot
+		//get the current position of the robot
+		currentX = odometer.getXYT()[0];
 		currentY = odometer.getXYT()[1];
 		currentT = odometer.getXYT()[2];
 		
@@ -111,32 +108,76 @@ public class Navigation implements Runnable {
 	    leftMotor.rotate(convertDistance(WHEEL_RAD, distance), true);
 	    rightMotor.rotate(convertDistance(WHEEL_RAD, distance), false);
 	}
+	
+	/**
+     * This method uses the current angle as a reference
+     * to turn to the angle required
+     * @param theta: angle to turn by
+     * @throws OdometerExceptions
+     */
+    public static void turnWithTheta(double theta) throws OdometerExceptions {
+
+    	boolean turnLeft = false;
+		double deltaAngle = 0;
+		// Get change in angle we want
+		prevAngle = Odometer.getOdometer().getXYT()[2];
+		deltaAngle = theta - prevAngle;
+
+		// If deltaAngle is negative, loop it back
+		if (deltaAngle < 0) {
+			deltaAngle = 360 - Math.abs(deltaAngle);
+		}
+
+		// Check if we want to move left or right
+		if (deltaAngle > 180) {
+			turnLeft = true;
+			deltaAngle = 360 - Math.abs(deltaAngle);
+		} else {
+			turnLeft = false;
+		}
+
+		// Set slower rotate speed
+		leftMotor.setSpeed(ROTATE_SPEED);
+		rightMotor.setSpeed(ROTATE_SPEED);
+
+		// Turn motors according to which direction we want to turn in
+		if (turnLeft) {
+			leftMotor.rotate(-convertAngle(Lab4.WHEEL_RAD, Lab4.TRACK, deltaAngle), true);
+			rightMotor.rotate(convertAngle(Lab4.WHEEL_RAD, Lab4.TRACK, deltaAngle), false);
+		} else {
+			leftMotor.rotate(convertAngle(Lab4.WHEEL_RAD, Lab4.TRACK, deltaAngle), true);
+			rightMotor.rotate(-convertAngle(Lab4.WHEEL_RAD, Lab4.TRACK, deltaAngle), false);
+		}
+
+    }
+	
+	
 	/**
 	 *	This method causes the robot to turn (on point) to the absolute heading theta. 
 	 *  This method should turn a MINIMAL angle to its target.
 	 *  @param theta turn angle value
 	 *  @return void
 	 */
-	void turnTo(double theta) {
+	public static void turnTo(double theta) {
 		if(theta>180) {//angel convention, turn in correct minimal angle
 			theta=360-theta;
 			leftMotor.setSpeed(ROTATE_SPEED);
 		    rightMotor.setSpeed(ROTATE_SPEED);
-			leftMotor.rotate(-convertAngle(WHEEL_RAD, TRACK, theta), true);
-			rightMotor.rotate(convertAngle(WHEEL_RAD, TRACK, theta), false);
+			leftMotor.rotate(-convertAngle(Lab4.WHEEL_RAD, Lab4.TRACK, theta), true);
+			rightMotor.rotate(convertAngle(Lab4.WHEEL_RAD, Lab4.TRACK, theta), false);
 			}
 		else if(theta<-180) {
 			theta=360+theta;
 			leftMotor.setSpeed(ROTATE_SPEED);
 		    rightMotor.setSpeed(ROTATE_SPEED);
-			leftMotor.rotate(convertAngle(WHEEL_RAD, TRACK, theta), true);
-			rightMotor.rotate(-convertAngle(WHEEL_RAD, TRACK, theta), false);
+			leftMotor.rotate(convertAngle(Lab4.WHEEL_RAD, Lab4.TRACK, theta), true);
+			rightMotor.rotate(-convertAngle(Lab4.WHEEL_RAD, Lab4.TRACK, theta), false);
 			}
 		else {
 			leftMotor.setSpeed(ROTATE_SPEED);
 		    rightMotor.setSpeed(ROTATE_SPEED);
-			leftMotor.rotate(convertAngle(WHEEL_RAD, TRACK, theta), true);
-			rightMotor.rotate(-convertAngle(WHEEL_RAD, TRACK, theta), false);	
+			leftMotor.rotate(convertAngle(Lab4.WHEEL_RAD, Lab4.TRACK, theta), true);
+			rightMotor.rotate(-convertAngle(Lab4.WHEEL_RAD, Lab4.TRACK, theta), false);	
 		}
 	}
 	
@@ -158,7 +199,7 @@ public class Navigation implements Runnable {
 	 * @param distance target distance
 	 * @return the wheel rotation 
 	 */
-	 private static int convertDistance(double radius, double distance) {
+	 public static int convertDistance(double radius, double distance) {
 		    return (int) ((180.0 * distance) / (Math.PI * radius));
 		  }
  	/**
@@ -168,7 +209,7 @@ public class Navigation implements Runnable {
 	 * @param angle target turn angle 
 	 * @return the wheel rotation 
 	 */
-	 private static int convertAngle(double radius, double width, double angle) {
+	 public static int convertAngle(double radius, double width, double angle) {
 		    return convertDistance(radius, Math.PI * width * angle / 360.0);
 	}
 
